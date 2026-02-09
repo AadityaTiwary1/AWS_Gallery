@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>EC2 S3 Photo Gallery</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+}
+
+header{
+  background:#020617;
+  padding:15px;
+  text-align:center;
+}
+
+.container{
+  padding:20px;
+  text-align:center;
+}
+
+button{
+  padding:10px 20px;
+  background:#38bdf8;
+  border:none;
+  cursor:pointer;
+}
+
+.gallery{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.gallery img{
+  width:200px;
+  height:200px;
+  object-fit:cover;
+  margin:10px;
+  border-radius:8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>Public Photo Gallery (EC2 + S3)</h1>
+</header>
+
+<div class="container">
+
+<h2>Upload Photo</h2>
+
+<input type="file" id="fileInput">
+<button onclick="uploadPhoto()">Upload</button>
+
+<h2>Gallery</h2>
+<div class="gallery" id="gallery"></div>
+
+</div>
+
+<script>
+
+const bucketName = "your bucket name here";
+const region = "us-east-1";
+
+function uploadPhoto(){
+
+  const file = document.getElementById("fileInput").files[0];
+
+  if(!file){
+    alert("Select a file");
+    return;
+  }
+
+  const url = `https://${bucketName}.s3.${region}.amazonaws.com/${file.name}`;
+
+  fetch(url,{
+    method:"PUT",
+    headers:{
+      "Content-Type": file.type
+    },
+    body:file
+  })
+  .then(()=>{
+    alert("Uploaded successfully!");
+    loadGallery();
+  })
+  .catch(()=>{
+    alert("Upload failed");
+  });
+}
+
+function loadGallery(){
+
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML="";
+
+  fetch(`https://${bucketName}.s3.${region}.amazonaws.com`)
+  .then(res => res.text())
+  .then(str => {
+
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(str,"text/xml");
+
+    const keys = xml.getElementsByTagName("Key");
+
+    for(let i=0;i<keys.length;i++){
+
+      const imageUrl =
+      `https://${bucketName}.s3.${region}.amazonaws.com/${keys[i].textContent}`;
+
+      const img = document.createElement("img");
+      img.src=imageUrl;
+
+      gallery.appendChild(img);
+    }
+  });
+}
+
+window.onload=loadGallery;
+
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html>
+<head>
+<title>EC2 S3 Photo Gallery</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0f172a;
+  color:white;
+}
+
+header{
+  background:#020617;
+  padding:15px;
+  text-align:center;
+}
+
+.container{
+  padding:20px;
+  text-align:center;
+}
+
+button{
+  padding:10px 20px;
+  background:#38bdf8;
+  border:none;
+  cursor:pointer;
+}
+
+.gallery{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:20px;
+}
+
+.gallery img{
+  width:200px;
+  height:200px;
+  object-fit:cover;
+  margin:10px;
+  border-radius:8px;
+}
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>Public Photo Gallery (EC2 + S3)</h1>
+</header>
+
+<div class="container">
+
+<h2>Upload Photo</h2>
+
+<input type="file" id="fileInput">
+<button onclick="uploadPhoto()">Upload</button>
+
+<h2>Gallery</h2>
+<div class="gallery" id="gallery"></div>
+
+</div>
+
+<script>
+
+const bucketName = "ec2-photo-gallery-public";
+const region = "us-east-1";
+
+function uploadPhoto(){
+
+  const file = document.getElementById("fileInput").files[0];
+
+  if(!file){
+    alert("Select a file");
+    return;
+  }
+
+  const url = `https://${bucketName}.s3.${region}.amazonaws.com/${file.name}`;
+
+  fetch(url,{
+    method:"PUT",
+    headers:{
+      "Content-Type": file.type
+    },
+    body:file
+  })
+  .then(()=>{
+    alert("Uploaded successfully!");
+    loadGallery();
+  })
+  .catch(()=>{
+    alert("Upload failed");
+  });
+}
+
+function loadGallery(){
+
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML="";
+
+  fetch(`https://${bucketName}.s3.${region}.amazonaws.com`)
+  .then(res => res.text())
+  .then(str => {
+
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(str,"text/xml");
+
+    const keys = xml.getElementsByTagName("Key");
+
+    for(let i=0;i<keys.length;i++){
+
+      const imageUrl =
+      `https://${bucketName}.s3.${region}.amazonaws.com/${keys[i].textContent}`;
+
+      const img = document.createElement("img");
+      img.src=imageUrl;
+
+      gallery.appendChild(img);
+    }
+  });
+}
+
+window.onload=loadGallery;
+
+</script>
+
+</body>
+</html>
